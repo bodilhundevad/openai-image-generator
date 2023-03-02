@@ -1,7 +1,12 @@
 class PagesController < ApplicationController
   def home
+    @email_response = params[:email]
+  end
+
+  def generate_response
     email = "Dear Bodil Hundevad,\n\nThank you for your application. We are excited to have you on board! Please find your offer attached.\n\nBest regards,\nRomana Haspelhuber"
     @email_response = openai_call(email)
+    redirect_to action: "home", email: @email_response
   end
 
   private
