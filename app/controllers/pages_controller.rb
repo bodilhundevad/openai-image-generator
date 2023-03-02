@@ -1,12 +1,11 @@
 class PagesController < ApplicationController
   def home
-    @email_response = params[:email]
+    @email_response = params[:email_response]
   end
 
   def generate_response
-    email = "Dear Bodil Hundevad,\n\nThank you for your application. We are excited to have you on board! Please find your offer attached.\n\nBest regards,\nRomana Haspelhuber"
-    @email_response = openai_call(email)
-    redirect_to action: "home", email: @email_response
+    @email_response = openai_call(params[:query])
+    redirect_to action: "home", email_response: @email_response
   end
 
   private
@@ -16,16 +15,21 @@ class PagesController < ApplicationController
   end
 
   def openai_call(email)
-    client = OpenAI::Client.new
-    response = client.completions(parameters: {
-      model: "text-davinci-001",
-      prompt: openai_email_prompt(email),
-      max_tokens:150
-    })
+    parameters = get_openai_parameters(email)
+    response = openai_client.completions(parameters: parameters)
+
     response.dig("choices", 0, "text")
   end
 
-  def openai_email_prompt(email)
+  def get_openai_parameters(email)
+    {
+      model: "text-davinci-001",
+      prompt: openai_prompt(email),
+      max_tokens:150
+    }
+  end
+
+  def openai_prompt(email)
     'Email:\n'+
     'Hi Bodil,\n'+
     ' \n'+
